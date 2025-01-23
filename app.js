@@ -25,13 +25,6 @@ app.listen(PORT, () => {
 //USE ROUTER
 app.use(express.json());
 
-app.use("/", mainRouter);
-
-//ROUTE TESTING
-app.get("/users", (req, res) => {
-  res.send({ message: "get request to /users" });
-});
-
 app.use((req, res, next) => {
   req.user = {
     _id: "5d8b8592978f8bd833ca8133", // paste the _id of the test user created in the previous step
@@ -39,9 +32,8 @@ app.use((req, res, next) => {
   console.log(req.body);
   next();
 });
-app.use("/items", (req, res) => {
-  res.send({ message: "hi Items on app is working" });
-});
+
+app.use("/", mainRouter);
 
 // // Start the server
 // app.listen(PORT, () => {
