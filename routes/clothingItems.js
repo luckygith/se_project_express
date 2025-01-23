@@ -11,7 +11,8 @@ const {
   createClothingItem,
   getClothingItems,
   deleteClothingItem,
-  likeClothingItem,
+  likeItem,
+  dislikeItem,
 } = require("../controllers/clothingItems");
 
 // routes start with /items
@@ -19,6 +20,7 @@ const {
 router.post("/", createClothingItem);
 router.get("/", getClothingItems);
 router.delete("/:itemId", deleteClothingItem);
-router.put("/:itemId/likes", likeClothingItem);
+router.put("/:itemId/likes", likeItem);
+router.delete("/:itemId/likes", dislikeItem);
 
 module.exports = router;
