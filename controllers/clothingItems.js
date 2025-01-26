@@ -6,40 +6,35 @@ const {
   BAD_REQUEST_400,
   NOT_FOUND_404,
   SERVER_ERROR_500,
-} = require("../utils/errors");
+} = require("../utils/statusCodes");
 
 const createClothingItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItem) => {
-      res.status(201).send(clothingItem);
+      res.send(clothingItem);
     })
     .catch((error) => {
-      if (!name || !weather || !imageUrl) {
-        return res.status(400).send({
-          message: "name field is req / must be atleast 2 characters long",
-        });
-      }
       if (error.name === "ValidationError") {
         res
           .status(BAD_REQUEST_400)
-          .send({ message: "Failed to create clothing item", error });
+          .send({ message: "Error: Failed to create clothing item" });
       }
       res
         .status(SERVER_ERROR_500)
-        .send({ message: "Failed to create clothing item", error });
+        .send({ message: "Error: Failed to create clothing item" });
     });
 };
 
 const getClothingItems = (req, res) => {
   ClothingItem.find({})
-    .then((clothingItems) => {
-      return res.status(200).send(clothingItems);
+    .then((items) => {
+      return res.send(items);
     })
-    .catch((error) => {
+    .catch(() => {
       res
-        .status(BAD_REQUEST_400)
-        .send({ message: "Failed to retrieve clothing items", error });
+        .status(SERVER_ERROR_500)
+        .send({ message: "Error: Failed to retrieve clothing items" });
     });
 };
 
@@ -54,15 +49,9 @@ const deleteClothingItem = (req, res) => {
         return res.status(NOT_FOUND_404).send({ message: "Item not found" });
       }
 
-      res.status(200).send({ message: "Item successfully deleted" });
+      res.send({ message: "Item successfully deleted" });
     })
     .catch((error) => {
-      if (error.itemId === "ValidationError") {
-        res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Failed to create clothing item", error });
-      }
-
       if (error.name === "CastError") {
         return res
           .status(BAD_REQUEST_400)
@@ -71,7 +60,7 @@ const deleteClothingItem = (req, res) => {
 
       return res
         .status(BAD_REQUEST_400)
-        .send({ message: "Failed to delete item", error });
+        .send({ message: "Failed to delete item" });
     });
 };
 
@@ -86,17 +75,23 @@ const likeItem = (req, res) => {
   )
     .orFail()
     .then((itemId) => {
-      return res.status(200).send(itemId);
+      return res.send(itemId);
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        return res.status(400).send({ message: "Item ID is invalid" });
-      } else {
-        return res.status(404).send({ message: "Item not found" });
+        return res
+          .status(BAD_REQUEST_400)
+          .send({ message: "Item ID is invalid" });
       }
+      if (error.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+      }
+      // else {
+      //   return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+      // }
       return res
         .status(SERVER_ERROR_500)
-        .send({ message: "Failed like function", error });
+        .send({ message: "Failed like function" });
     });
 };
 
@@ -111,19 +106,19 @@ const dislikeItem = (req, res) => {
   )
     .then((itemId) => {
       if (!itemId) {
-        return res.status(404).send({ message: "Invalid ID format" });
+        return res.status(NOT_FOUND_404).send({ message: "Invalid ID format" });
       }
-      return res.status(200).send(itemId);
+      return res.send({ message: "Item is disliked" });
     })
     .catch((error) => {
       if (error.name === "CastError") {
         return res
           .status(BAD_REQUEST_400)
-          .send({ message: "Failed to dislike item. Item Id Error", error });
+          .send({ message: "Failed to dislike item. Item Id Error" });
       }
       return res
         .status(SERVER_ERROR_500)
-        .send({ message: "Failed dislike function", error });
+        .send({ message: "Failed dislike function" });
     });
 };
 

@@ -4,39 +4,54 @@ const {
   BAD_REQUEST_400,
   NOT_FOUND_404,
   SERVER_ERROR_500,
-} = require("../utils/errors");
+} = require("../utils/statusCodes");
 
 const getUsers = (req, res) => {
   User.find({}) // .find() asynchronous /empty {} returns all!
     .then((users) => {
       res.send(users);
     })
-    .catch(console.error);
+    .catch(() => {
+      res.status(SERVER_ERROR_500).send({ message: "Server Error" });
+    });
 };
 
 const getUserId = (req, res) => {
   const { userId } = req.params;
-  console.log("getUserId is working");
   User.findById(userId)
 
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND_404).send({ message: "User not found" });
       }
-      res.status(200).send(user);
+      res.send({ user });
     })
-
     .catch((error) => {
-      res.status(BAD_REQUEST_400).send(error);
+      if (error.name === "CastError") {
+        return res
+          .status(BAD_REQUEST_400)
+          .send({ message: "UserId is invalid" });
+      }
+      res
+        .status(SERVER_ERROR_500)
+        .send({ message: "Error: User info request unsuccessful" });
     });
 };
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
-  console.log(name, avatar);
   User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((error) => res.status(BAD_REQUEST_400).send(error));
+    .then((user) => res.send(user))
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_400)
+          .send({ message: "Unable to complete request" });
+      }
+      return res
+        .status(SERVER_ERROR_500)
+        .send({ message: "Error: Create User was unsuccessful" });
+    });
 };
 
 module.exports = { getUsers, getUserId, createUser };

@@ -1,6 +1,3 @@
-console.error("HELLO THERE");
-// console.log("hi there"); // this is warning
-
 module.exports = {
   env: {
     es2021: true,
@@ -24,12 +21,7 @@ module.exports = {
   },
   rules: {
     "no-console": ["warn", { allow: ["error"] }],
-    camelcase: [
-      "error",
-      {
-        allow: ["_id"], // Allow underscores for `_id`
-        properties: "never", // Disable enforcing camelCase for object properties
-      },
-    ],
+
+    "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },
 };
