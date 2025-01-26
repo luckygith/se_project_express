@@ -24,7 +24,7 @@ const clothingSchema = new mongoose.Schema({
     },
   },
   owner: {
-    //a link to the item author's model of the ObjectId type, a required field
+    // a link to the item author's model of the ObjectId type, a required field
     required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",

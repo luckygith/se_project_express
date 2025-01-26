@@ -1,5 +1,5 @@
+// const router = require("express").Router();
 const User = require("../models/user");
-const router = require("express").Router();
 const {
   BAD_REQUEST_400,
   NOT_FOUND_404,
@@ -8,12 +8,10 @@ const {
 
 const getUsers = (req, res) => {
   User.find({}) // .find() asynchronous /empty {} returns all!
-    .then((users) => {
-      res.send(users);
-    })
-    .catch(() => {
-      res.status(SERVER_ERROR_500).send({ message: "Server Error" });
-    });
+    .then((users) => res.send(users))
+    .catch(() =>
+      res.status(SERVER_ERROR_500).send({ message: "Server Error" })
+    );
 };
 
 const getUserId = (req, res) => {
@@ -24,7 +22,7 @@ const getUserId = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND_404).send({ message: "User not found" });
       }
-      res.send({ user });
+      return res.send({ user });
     })
     .catch((error) => {
       if (error.name === "CastError") {
@@ -32,7 +30,7 @@ const getUserId = (req, res) => {
           .status(BAD_REQUEST_400)
           .send({ message: "UserId is invalid" });
       }
-      res
+      return res
         .status(SERVER_ERROR_500)
         .send({ message: "Error: User info request unsuccessful" });
     });
