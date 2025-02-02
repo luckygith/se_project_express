@@ -2,6 +2,7 @@ const BAD_REQUEST_400 = 400;
 const NOT_FOUND_404 = 404;
 const SERVER_ERROR_500 = 500;
 const DUPLICATE_ERROR_409 = 409;
+const INCORRECT_INFO_401 = 401;
 
 module.exports = {
   BAD_REQUEST_400,

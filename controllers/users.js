@@ -2,13 +2,31 @@
 const User = require("../models/user");
 
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const {
   BAD_REQUEST_400,
   NOT_FOUND_404,
   SERVER_ERROR_500,
   DUPLICATE_ERROR_409,
+  INCORRECT_INFO_401,
 } = require("../utils/statusCodes");
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+      // authentication successful! user is in the user variable
+    })
+    .catch((error) => {
+      // authentication error
+      res.status(401).send({ message: error.message });
+    });
+};
 
 const getUsers = (req, res) => {
   User.find({}) // .find() asynchronous /empty {} returns all!
@@ -43,9 +61,9 @@ const getUserId = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
-    .hash(req.body.password, 10)
+    .hash(password, 10)
     .then((hash) => {
-      User.create({
+      return User.create({
         name,
         avatar,
         email,
@@ -62,6 +80,11 @@ const createUser = (req, res) => {
       })
     ) //EXCLUDE SENDING PASSWORD DETAILS!
     .catch((error) => {
+      if (!match) {
+        res
+          .status(INCORRECT_INFO_401)
+          .send({ message: "Error: inccorect email or password" });
+      }
       if (error.code === 11000) {
         res
           .status(DUPLICATE_ERROR_409)
