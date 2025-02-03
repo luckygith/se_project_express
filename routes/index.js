@@ -10,4 +10,6 @@ router.use((req, res) => {
   res.status(NOT_FOUND_404).send({ message: "Requested route not found" });
 });
 
+app.post("/signin", login);
+app.post("/signup", createUser);
 module.exports = router;
