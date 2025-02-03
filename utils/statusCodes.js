@@ -9,4 +9,5 @@ module.exports = {
   NOT_FOUND_404,
   SERVER_ERROR_500,
   DUPLICATE_ERROR_409,
+  INCORRECT_INFO_401,
 };
