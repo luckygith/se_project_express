@@ -1,6 +1,9 @@
 const express = require("express"); // connect express server!
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const cors = require("cors");
+
+app.use(cors());
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
