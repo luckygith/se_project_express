@@ -4,6 +4,7 @@ const userRouter = require("./users");
 const clothingItemRouter = require("./clothingItems");
 const { NOT_FOUND_404 } = require("../utils/statusCodes");
 const { login, createUser } = require("../controllers/users");
+const auth = require("../middlewares/auth");
 
 router.use("/users", userRouter);
 
@@ -18,6 +19,6 @@ router.use("/items", clothingItemRouter);
 
 //Req authentication
 router.use(auth);
-router.use("/users", userRouter);
+router.use("/users", auth, userRouter);
 
 module.exports = router;
