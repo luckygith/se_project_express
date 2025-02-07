@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     type: String,
     minlength: 8,
+    select: false, //ensures user's password password hidden when verifying creds
   },
 });
 
@@ -41,7 +42,8 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
   password
 ) {
   // trying to find the user by email
-  return this.findOne({ email }) // this — the User model
+  return this.findOne({ email })
+    .select("+password") // Explicitly include password for authentication// this — the User model
     .then((user) => {
       // not found - rejecting the promise
       if (!user) {

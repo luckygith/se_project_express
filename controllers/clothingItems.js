@@ -33,12 +33,18 @@ const getClothingItems = (req, res) => {
 
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id; //get ID of USER logged in!
 
   ClothingItem.findByIdAndDelete(itemId)
 
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+      }
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(FORBIDDEN_403)
+          .send({ message: "Unauthorized request" });
       }
 
       return res.send({ message: "Item successfully deleted" });
