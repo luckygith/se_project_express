@@ -3,6 +3,9 @@ const {
   BAD_REQUEST_400,
   NOT_FOUND_404,
   SERVER_ERROR_500,
+  UNAUTHORIZED_403,
+  DUPLICATE_ERROR_409 = 409,
+  INCORRECT_INFO_401 = 401,
 } = require("../utils/statusCodes");
 
 const createClothingItem = (req, res) => {
@@ -32,23 +35,36 @@ const getClothingItems = (req, res) => {
 };
 
 const deleteClothingItem = (req, res) => {
-  const { itemId } = req.params;
-  const userId = req.user._id; //get ID of USER logged in!
+  const itemId = req.params.itemId;
+  const userId = req.user._id;
 
-  ClothingItem.findByIdAndDelete(itemId)
-
+  ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND_404).send({ message: "Item not found" });
       }
       if (item.owner.toString() !== userId) {
         return res
-          .status(FORBIDDEN_403)
+          .status(UNAUTHORIZED_403)
           .send({ message: "Unauthorized request" });
       }
-
-      return res.send({ message: "Item successfully deleted" });
+      return ClothingItem.findByIdAndDelete(itemId);
     })
+
+    // ClothingItem.findByIdAndDelete(itemId)
+
+    //   .then((item) => {
+    //     if (!item) {
+    //       return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+    //     }
+    //     if (item.owner.toString() !== userId) {
+    //       return res
+    //         .status(UNAUTHORIZED_403)
+    //         .send({ message: "Unauthorized request" });
+    //     }
+
+    //     return res.status(200).send({ message: "Item successfully deleted" });
+    //   })
     .catch((error) => {
       if (error.name === "CastError") {
         return res
@@ -63,16 +79,35 @@ const deleteClothingItem = (req, res) => {
 };
 
 const likeItem = (req, res) => {
-  const { itemId } = req.params;
+  const itemId = req.params.itemId;
   const userId = req.user._id;
+
+  if (!userId) {
+    return res.status(NOT_FOUND_404).send({ message: "User ID is required" });
+  }
+
+  if (!itemId) {
+    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
+  }
 
   ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: userId } }, // add _id to the array if it's not there yet
-    { new: true }
+    { new: true, runValidators: true }
   )
-    .orFail()
-    .then((updatedItemId) => res.send(updatedItemId))
+
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.name = "DocumentNotFoundError"; // Properly name the error for the catch block
+      throw err;
+    })
+    .then((updatedItem) => {
+      if (!itemId) {
+        return res.status(NOT_FOUND_404).send({ message: "ItemID NONE" });
+      }
+
+      return res.status(200).send(updatedItem);
+    })
     .catch((error) => {
       if (error.name === "CastError") {
         return res
@@ -85,23 +120,38 @@ const likeItem = (req, res) => {
       // else {
       //   return res.status(NOT_FOUND_404).send({ message: "Item not found" });
       // }
+
       return res
         .status(SERVER_ERROR_500)
-        .send({ message: "Failed like function" });
+        .send({ message: "Failed like functionnn" });
     });
 };
 
-const dislikeItem = (req, res) => {
-  const { itemId } = req.params;
+const unlikeItem = (req, res) => {
+  // const itemId = req.params.itemId;
   const userId = req.user._id;
+  const { itemId } = req.params;
+
+  if (!userId) {
+    return res.status(NOT_FOUND_404).send({ message: "User ID is required" });
+  }
+
+  if (!itemId) {
+    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
+  }
 
   ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: userId } }, // remove _id from the array
-    { new: true }
+    { new: true, runValidators: true }
   )
-    .then((updatedItemId) => {
-      if (!updatedItemId) {
+    .orFail(() => {
+      const err = new Error("Item not found");
+      err.name = "DocumentNotFoundError"; // Properly name the error for the catch block
+      throw err;
+    })
+    .then((itemId) => {
+      if (!itemId) {
         return res.status(NOT_FOUND_404).send({ message: "Invalid ID format" });
       }
       return res.send({ message: "Item is disliked" });
@@ -111,6 +161,9 @@ const dislikeItem = (req, res) => {
         return res
           .status(BAD_REQUEST_400)
           .send({ message: "Failed to dislike item. Item Id Error" });
+      }
+      if (error.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
       }
       return res
         .status(SERVER_ERROR_500)
@@ -123,5 +176,5 @@ module.exports = {
   createClothingItem,
   deleteClothingItem,
   likeItem,
-  dislikeItem,
+  unlikeItem,
 };

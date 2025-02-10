@@ -1,7 +1,7 @@
 const express = require("express"); // connect express server!
+const cors = require("cors");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
-const cors = require("cors");
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
@@ -28,11 +28,6 @@ app.listen(PORT, () => {
 app.use(express.json());
 
 // DESIGNATED CUSHION FOR USER INFO FOR NOW
-app.use((req, res, next) => {
-  req.user = {
-    _id: "5d8b8592978f8bd833ca8133", // paste the _id of the test user created in the previous step
-  };
-  next();
-});
+// x
 
 app.use("/", mainRouter);
