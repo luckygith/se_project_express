@@ -8,13 +8,12 @@ const auth = require("../middlewares/auth");
 
 router.use("/users", userRouter);
 
-//No authentication
+// No authentication
 router.post("/signup", createUser);
 router.post("/signin", login);
 router.use("/items", clothingItemRouter);
 
-//Req authentication
-// router.use(auth);
+// Req authentication
 router.use("/users", auth, userRouter);
 
 router.use((req, res) => {
@@ -22,3 +21,5 @@ router.use((req, res) => {
 });
 
 module.exports = router;
+
+// router.use(auth);

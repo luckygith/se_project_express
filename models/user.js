@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     type: String,
     minlength: 8,
-    select: false, //ensures user's password password hidden when verifying creds
+    select: false, // ensures user's password password hidden when verifying creds
   },
 });
 

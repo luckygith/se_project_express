@@ -4,8 +4,6 @@ const {
   NOT_FOUND_404,
   SERVER_ERROR_500,
   UNAUTHORIZED_403,
-  DUPLICATE_ERROR_409 = 409,
-  INCORRECT_INFO_401 = 401,
 } = require("../utils/statusCodes");
 
 const createClothingItem = (req, res) => {
@@ -35,8 +33,8 @@ const getClothingItems = (req, res) => {
 };
 
 const deleteClothingItem = (req, res) => {
-  const itemId = req.params.itemId;
-  const userId = req.user._id;
+  const { itemId } = req.params;
+  const { userId } = req.user;
 
   ClothingItem.findById(itemId)
     .then((item) => {
@@ -48,38 +46,24 @@ const deleteClothingItem = (req, res) => {
           .status(UNAUTHORIZED_403)
           .send({ message: "Unauthorized request" });
       }
-      return ClothingItem.findByIdAndDelete(itemId);
+      return ClothingItem.deleteOne(item).then(() =>
+        res.status(200).send({ message: "Item successfully deleted" })
+      );
     })
-
-    // ClothingItem.findByIdAndDelete(itemId)
-
-    //   .then((item) => {
-    //     if (!item) {
-    //       return res.status(NOT_FOUND_404).send({ message: "Item not found" });
-    //     }
-    //     if (item.owner.toString() !== userId) {
-    //       return res
-    //         .status(UNAUTHORIZED_403)
-    //         .send({ message: "Unauthorized request" });
-    //     }
-
-    //     return res.status(200).send({ message: "Item successfully deleted" });
-    //   })
     .catch((error) => {
       if (error.name === "CastError") {
         return res
-          .status(BAD_REQUEST_400)
+          .status(UNAUTHORIZED_403)
           .send({ message: "Failed to delete item. Authorization error" });
       }
-
       return res
-        .status(BAD_REQUEST_400)
+        .status(SERVER_ERROR_500)
         .send({ message: "Failed to delete item" });
     });
 };
 
 const likeItem = (req, res) => {
-  const itemId = req.params.itemId;
+  const { itemId } = req.params;
   const userId = req.user._id;
 
   if (!userId) {
@@ -90,7 +74,7 @@ const likeItem = (req, res) => {
     return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
   }
 
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: userId } }, // add _id to the array if it's not there yet
     { new: true, runValidators: true }
@@ -117,10 +101,6 @@ const likeItem = (req, res) => {
       if (error.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND_404).send({ message: "Item not found" });
       }
-      // else {
-      //   return res.status(NOT_FOUND_404).send({ message: "Item not found" });
-      // }
-
       return res
         .status(SERVER_ERROR_500)
         .send({ message: "Failed like functionnn" });
@@ -128,7 +108,6 @@ const likeItem = (req, res) => {
 };
 
 const unlikeItem = (req, res) => {
-  // const itemId = req.params.itemId;
   const userId = req.user._id;
   const { itemId } = req.params;
 
@@ -140,7 +119,7 @@ const unlikeItem = (req, res) => {
     return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
   }
 
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: userId } }, // remove _id from the array
     { new: true, runValidators: true }
@@ -150,8 +129,8 @@ const unlikeItem = (req, res) => {
       err.name = "DocumentNotFoundError"; // Properly name the error for the catch block
       throw err;
     })
-    .then((itemId) => {
-      if (!itemId) {
+    .then((item) => {
+      if (!item) {
         return res.status(NOT_FOUND_404).send({ message: "Invalid ID format" });
       }
       return res.send({ message: "Item is disliked" });

@@ -1,8 +1,8 @@
 // const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs"); // library for hashing
 const User = require("../models/user");
 
-const bcrypt = require("bcryptjs"); //library for hashing
-const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 
 const {
@@ -11,7 +11,6 @@ const {
   SERVER_ERROR_500,
   DUPLICATE_ERROR_409,
   INCORRECT_INFO_401,
-  UNAUTHORIZED_403,
 } = require("../utils/statusCodes");
 
 const login = (req, res) => {
@@ -21,7 +20,7 @@ const login = (req, res) => {
       .status(BAD_REQUEST_400)
       .send({ message: "Missing Info: Email or Password" });
   }
-  return User.findUserByCredentials(email, password) //calling model method to verify creds
+  return User.findUserByCredentials(email, password) // calling model method to verify creds
     .then((user) => {
       console.log(user);
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -40,15 +39,12 @@ const login = (req, res) => {
     });
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res) =>
   User.find({}) // .find() asynchronous /empty {} returns all!
-    .then((users) => {
-      return res.status(200).send(users);
-    })
+    .then((users) => res.status(200).send(users))
     .catch(() =>
       res.status(SERVER_ERROR_500).send({ message: "Server Error" })
     );
-};
 
 const getCurrentUser = (req, res) => {
   // const { userId } = req.user._id;
@@ -82,33 +78,37 @@ const createUser = (req, res) => {
       .send({ message: "Missing required fields" });
   }
 
-  User.findOne({ email })
+  return User.findOne({ email })
     .then((user) => {
-      if (user) {
+      if (!user) {
         return res
           .status(DUPLICATE_ERROR_409)
           .send({ message: "User already exists" });
       }
       // Continue with user creation if no existing user
-      return bcrypt.hash(password, 10); //RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
+      return bcrypt.hash(password, 10); // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
     })
-    .then((hash) => {
-      return User.create({
+    .then((hash) =>
+      User.create({
         name,
         avatar,
         email,
         password: hash, // adding the hash to the database
-      });
-    })
+      })
+    )
     .then((user) => {
-      if (!user) return;
+      if (!user) {
+        return res
+          .status(NOT_FOUND_404)
+          .send({ message: "User creation failed" });
+      }
       return res.status(201).send({
         name: user.name,
         avatar: user.avatar,
         email: user.email,
         _id: user._id,
       });
-    }) //EXCLUDE SENDING PASSWORD DETAILS!
+    }) // EXCLUDE SENDING PASSWORD DETAILS!
     .catch((error) => {
       if (error.code === 11000) {
         return res
