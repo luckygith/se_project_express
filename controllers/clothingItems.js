@@ -43,14 +43,20 @@ const deleteClothingItem = (req, res) => {
       }
       if (item.owner.toString() !== userId) {
         return res
-          .status(UNAUTHORIZED_403)
-          .send({ message: "Unauthorized request" });
+          .status(NOT_FOUND_404)
+          .send({ message: "Unauthorized request: user" });
       }
-      return ClothingItem.deleteOne(item).then(() =>
-        res.status(200).send({ message: "Item successfully deleted" })
-      );
+
+      return ClothingItem.findByIdAndDelete(itemId);
+    })
+    .then(() => {
+      if (!itemId) {
+        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+      }
+      return res.status(200).send({ message: "Item successfully deleted" });
     })
     .catch((error) => {
+      console.error(error);
       if (error.name === "CastError") {
         return res
           .status(UNAUTHORIZED_403)
@@ -65,19 +71,16 @@ const deleteClothingItem = (req, res) => {
 const likeItem = (req, res) => {
   const { itemId } = req.params;
   const userId = req.user._id;
-
   if (!userId) {
     return res
       .status(SERVER_ERROR_500)
       .send({ message: "User ID is required" });
   }
-
   if (!itemId) {
     return res
       .status(SERVER_ERROR_500)
       .send({ message: "Item ID is required" });
   }
-
   return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: userId } }, // add _id to the array if it's not there yet

@@ -76,24 +76,25 @@ const createUser = (req, res) => {
       .send({ message: "Missing required fields" });
   }
 
-  // return User.findOne({ email })
-  //   .then((user) => {
-  //     if (!user) {
-  //       return res
-  //         .status(DUPLICATE_ERROR_409)
-  //         .send({ message: "User already exists" });
-  //     }
-  // Continue with user creation if no existing user
-  return bcrypt
-    .hash(password, 10) // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
-    .then((hash) =>
-      User.create({
-        name,
-        avatar,
-        email,
-        password: hash, // adding the hash to the database
-      })
-    )
+  return User.findOne({ email }) // Check if user already exists
+    .then((existingUser) => {
+      if (existingUser) {
+        return res
+          .status(DUPLICATE_ERROR_409)
+          .send({ message: "User already exists" });
+      }
+      // Continue with user creation if no existing user
+      return bcrypt
+        .hash(password, 10) // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
+        .then((hash) =>
+          User.create({
+            name,
+            avatar,
+            email,
+            password: hash, // adding the hash to the database
+          })
+        );
+    })
     .then((user) =>
       res.status(201).send({
         name: user.name,
