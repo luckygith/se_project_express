@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
   password: {
     required: true,
     type: String,
-    minlength: 8,
     select: false, // ensures user's password password hidden when verifying creds
   },
 });
@@ -54,7 +53,7 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
       // if found - comparing hashes
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error("Incorrrrrect email or password"));
+          return Promise.reject(new Error("Incorrect password"));
         }
         return user; // now user is available
       });

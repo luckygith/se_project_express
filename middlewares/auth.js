@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { INCORRECT_INFO_401, BAD_REQUEST_400 } = require("../utils/statusCodes");
+const { INCORRECT_INFO_401 } = require("../utils/statusCodes");
 const { JWT_SECRET } = require("../utils/config");
 
 const auth = (req, res, next) => {
@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
     return res
-      .status(BAD_REQUEST_400)
+      .status(INCORRECT_INFO_401)
       .send({ message: "Authorization required" });
   }
   const token = authorization.replace("Bearer ", ""); // getting token header and removing prefix to leave JWT

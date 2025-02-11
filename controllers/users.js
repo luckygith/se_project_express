@@ -32,19 +32,17 @@ const login = (req, res) => {
       if (error.message === "User not found") {
         return res
           .status(INCORRECT_INFO_401)
-          .send({ message: "Authentication Error" });
+          .send({ message: "Authentication Error: user" });
+      }
+      if (error.message === "Incorrect password") {
+        return res
+          .status(INCORRECT_INFO_401)
+          .send({ message: "Authentication Error: password" });
       }
       // // authentication error
       return res.status(SERVER_ERROR_500).send({ message: error.message });
     });
 };
-
-const getUsers = (req, res) =>
-  User.find({}) // .find() asynchronous /empty {} returns all!
-    .then((users) => res.status(200).send(users))
-    .catch(() =>
-      res.status(SERVER_ERROR_500).send({ message: "Server Error" })
-    );
 
 const getCurrentUser = (req, res) => {
   // const { userId } = req.user._id;
@@ -78,16 +76,16 @@ const createUser = (req, res) => {
       .send({ message: "Missing required fields" });
   }
 
-  return User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(DUPLICATE_ERROR_409)
-          .send({ message: "User already exists" });
-      }
-      // Continue with user creation if no existing user
-      return bcrypt.hash(password, 10); // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
-    })
+  // return User.findOne({ email })
+  //   .then((user) => {
+  //     if (!user) {
+  //       return res
+  //         .status(DUPLICATE_ERROR_409)
+  //         .send({ message: "User already exists" });
+  //     }
+  // Continue with user creation if no existing user
+  return bcrypt
+    .hash(password, 10) // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
     .then((hash) =>
       User.create({
         name,
@@ -96,19 +94,14 @@ const createUser = (req, res) => {
         password: hash, // adding the hash to the database
       })
     )
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(NOT_FOUND_404)
-          .send({ message: "User creation failed" });
-      }
-      return res.status(201).send({
+    .then((user) =>
+      res.status(201).send({
         name: user.name,
         avatar: user.avatar,
         email: user.email,
         _id: user._id,
-      });
-    }) // EXCLUDE SENDING PASSWORD DETAILS!
+      })
+    ) // EXCLUDE SENDING PASSWORD DETAILS!
     .catch((error) => {
       if (error.code === 11000) {
         return res
@@ -137,11 +130,6 @@ const updateUserProfile = (req, res) => {
     { new: true, runValidators: true }
   )
     .then((user) => {
-      if (!name && !avatar) {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Name or avatar must be provided to update" });
-      }
       if (!user) {
         return res.status(NOT_FOUND_404).send({ message: "User not found!!!" });
       }
@@ -160,7 +148,6 @@ const updateUserProfile = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   getCurrentUser,
   createUser,
   login,

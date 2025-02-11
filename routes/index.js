@@ -6,8 +6,6 @@ const { NOT_FOUND_404 } = require("../utils/statusCodes");
 const { login, createUser } = require("../controllers/users");
 const auth = require("../middlewares/auth");
 
-router.use("/users", userRouter);
-
 // No authentication
 router.post("/signup", createUser);
 router.post("/signin", login);

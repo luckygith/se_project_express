@@ -67,11 +67,15 @@ const likeItem = (req, res) => {
   const userId = req.user._id;
 
   if (!userId) {
-    return res.status(NOT_FOUND_404).send({ message: "User ID is required" });
+    return res
+      .status(SERVER_ERROR_500)
+      .send({ message: "User ID is required" });
   }
 
   if (!itemId) {
-    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
+    return res
+      .status(SERVER_ERROR_500)
+      .send({ message: "Item ID is required" });
   }
 
   return ClothingItem.findByIdAndUpdate(
