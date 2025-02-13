@@ -1,4 +1,3 @@
-// const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs"); // library for hashing
 const User = require("../models/user");
@@ -77,24 +76,21 @@ const createUser = (req, res) => {
   }
 
   return User.findOne({ email }) // Check if user already exists
-    .then((existingUser) => {
-      if (existingUser) {
-        return res
-          .status(DUPLICATE_ERROR_409)
-          .send({ message: "User already exists" });
+    .then((userId) => {
+      if (userId) {
+        throw new Error("User already exists");
       }
-      // Continue with user creation if no existing user
-      return bcrypt
-        .hash(password, 10) // RETURN ONLY THIS PROMISE TO PREVENT multiple EXECS
-        .then((hash) =>
-          User.create({
-            name,
-            avatar,
-            email,
-            password: hash, // adding the hash to the database
-          })
-        );
+      return bcrypt.hash(password, 10);
     })
+    .then((hash) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: hash, // adding the hash to the db
+      })
+    )
+
     .then((user) =>
       res.status(201).send({
         name: user.name,
@@ -104,7 +100,12 @@ const createUser = (req, res) => {
       })
     ) // EXCLUDE SENDING PASSWORD DETAILS!
     .catch((error) => {
-      if (error.code === 11000) {
+      console.error("Error creating user:", error);
+
+      if (
+        error.code === 11000 ||
+        error.message.includes("User already exists")
+      ) {
         return res
           .status(DUPLICATE_ERROR_409)
           .send({ message: "Error: User already exists" });
@@ -112,17 +113,18 @@ const createUser = (req, res) => {
       if (error.name === "ValidationError") {
         return res
           .status(BAD_REQUEST_400)
-          .send({ message: "Unable to complete request" });
+          .send({ message: "Error: name validation" });
       }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Server Error: Create User was unsuccessful", error });
+      return res.status(SERVER_ERROR_500).send({
+        message: "Server Error: Create User was unsuccessful",
+        error,
+      });
     });
 };
 
 const updateUserProfile = (req, res) => {
   const { name, avatar } = req.body;
-  // const { userId } = req.user;
+
   const userId = req.user._id;
 
   User.findByIdAndUpdate(

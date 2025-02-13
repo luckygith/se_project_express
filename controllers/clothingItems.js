@@ -34,7 +34,7 @@ const getClothingItems = (req, res) => {
 
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
-  const { userId } = req.user;
+  const userId = req.user._id;
 
   ClothingItem.findById(itemId)
     .then((item) => {
@@ -43,23 +43,19 @@ const deleteClothingItem = (req, res) => {
       }
       if (item.owner.toString() !== userId) {
         return res
-          .status(NOT_FOUND_404)
+          .status(UNAUTHORIZED_403)
           .send({ message: "Unauthorized request: user" });
       }
 
-      return ClothingItem.findByIdAndDelete(itemId);
-    })
-    .then(() => {
-      if (!itemId) {
-        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
-      }
-      return res.status(200).send({ message: "Item successfully deleted" });
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.status(200).send({ message: "Item successfully deleted" })
+      );
     })
     .catch((error) => {
       console.error(error);
       if (error.name === "CastError") {
         return res
-          .status(UNAUTHORIZED_403)
+          .status(BAD_REQUEST_400)
           .send({ message: "Failed to delete item. Authorization error" });
       }
       return res
@@ -71,15 +67,8 @@ const deleteClothingItem = (req, res) => {
 const likeItem = (req, res) => {
   const { itemId } = req.params;
   const userId = req.user._id;
-  if (!userId) {
-    return res
-      .status(SERVER_ERROR_500)
-      .send({ message: "User ID is required" });
-  }
   if (!itemId) {
-    return res
-      .status(SERVER_ERROR_500)
-      .send({ message: "Item ID is required" });
+    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
   }
   return ClothingItem.findByIdAndUpdate(
     itemId,
@@ -92,13 +81,7 @@ const likeItem = (req, res) => {
       err.name = "DocumentNotFoundError"; // Properly name the error for the catch block
       throw err;
     })
-    .then((updatedItem) => {
-      if (!itemId) {
-        return res.status(NOT_FOUND_404).send({ message: "ItemID NONE" });
-      }
-
-      return res.status(200).send(updatedItem);
-    })
+    .then((updatedItem) => res.status(200).send(updatedItem))
     .catch((error) => {
       if (error.name === "CastError") {
         return res
@@ -118,30 +101,26 @@ const unlikeItem = (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
-  if (!userId) {
-    return res.status(NOT_FOUND_404).send({ message: "User ID is required" });
-  }
-
   if (!itemId) {
     return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
   }
 
   return ClothingItem.findByIdAndUpdate(
     itemId,
-    { $pull: { likes: userId } }, // remove _id from the array
+    { $pull: { likes: userId } }, // removess _id from the array
     { new: true, runValidators: true }
   )
     .orFail(() => {
-      const err = new Error("Item not found");
-      err.name = "DocumentNotFoundError"; // Properly name the error for the catch block
-      throw err;
+      const error = new Error("Item not found");
+      error.name = "DocumentNotFoundError";
+      throw error;
     })
-    .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND_404).send({ message: "Invalid ID format" });
-      }
-      return res.send({ message: "Item is disliked" });
-    })
+    .then(() => 
+      // Send the response only if the item is successfully updated
+
+       res.status(200).send({ message: "Item is disliked" })
+    )
+
     .catch((error) => {
       if (error.name === "CastError") {
         return res
