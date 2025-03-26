@@ -115,10 +115,9 @@ const unlikeItem = (req, res) => {
       error.name = "DocumentNotFoundError";
       throw error;
     })
-    .then(() => 
+    .then(() =>
       // Send the response only if the item is successfully updated
-
-       res.status(200).send({ message: "Item is disliked" })
+      res.status(200).send({ message: "Item is updated" })
     )
 
     .catch((error) => {

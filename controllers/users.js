@@ -67,9 +67,9 @@ const getCurrentUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar, email, password } = req.body;
+  const { email, password, name, avatar } = req.body;
 
-  if (!name || !avatar || !email || !password) {
+  if (!email || !password || !name || !avatar) {
     return res
       .status(BAD_REQUEST_400)
       .send({ message: "Missing required fields" });
