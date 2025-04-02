@@ -2,6 +2,7 @@ const express = require("express"); // connect express server!
 const cors = require("cors");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const { errorHandler } = require("./middlewares/error-handler");
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
@@ -31,3 +32,5 @@ app.use(express.json());
 // x
 
 app.use("/", mainRouter);
+
+app.use(errorHandler);

@@ -1,3 +1,6 @@
+const BadRequestError = require("../errors/bad-request-error");
+const NotFoundError = require("../errors/not-found-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
 const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST_400,
@@ -12,24 +15,26 @@ const createClothingItem = (req, res) => {
     .then((clothingItem) => res.send(clothingItem))
     .catch((error) => {
       if (error.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Error: Failed to create clothing item" });
+        next(
+          new BadRequestError("Could not update with information provided.")
+        );
+      } else {
+        next(error);
       }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Error: Failed to create clothing item" });
     });
 };
+
+// .catch((error) => {
+// if (error.name === "CastError") {
+// next(new BadRequestError("Invalid data provided"));
+// }
 
 const getClothingItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
-    .catch(() =>
-      res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Error: Failed to retrieve clothing items" })
-    );
+    .catch((error) => {
+      next(error);
+    });
 };
 
 const deleteClothingItem = (req, res) => {
@@ -39,12 +44,10 @@ const deleteClothingItem = (req, res) => {
   ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
+        next(new NotFoundError("Item not found"));
       }
       if (item.owner.toString() !== userId) {
-        return res
-          .status(UNAUTHORIZED_403)
-          .send({ message: "Unauthorized request: user" });
+        next(new UnauthorizedError("Unauthorized request: user"));
       }
 
       return ClothingItem.findByIdAndDelete(itemId).then(() =>
@@ -54,13 +57,10 @@ const deleteClothingItem = (req, res) => {
     .catch((error) => {
       console.error(error);
       if (error.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Failed to delete item. Authorization error" });
+        next(new BadRequestError("Failed to delete item"));
+      } else {
+        next(error);
       }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Failed to delete item" });
     });
 };
 
@@ -84,16 +84,12 @@ const likeItem = (req, res) => {
     .then((updatedItem) => res.status(200).send(updatedItem))
     .catch((error) => {
       if (error.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Item ID is invalid" });
+        next(new BadRequestError("Item ID is required"));
+      } else if (error.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(error);
       }
-      if (error.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
-      }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Failed like functionnn" });
     });
 };
 
@@ -102,7 +98,7 @@ const unlikeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!itemId) {
-    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
+    next(new BadRequestError("Item ID is required"));
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -119,19 +115,14 @@ const unlikeItem = (req, res) => {
       // Send the response only if the item is successfully updated
       res.status(200).send({ message: "Item is updated" })
     )
-
     .catch((error) => {
       if (error.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Failed to dislike item. Item Id Error" });
+        next(new BadRequestError("Failed to dislike item. Item Id Error"));
+      } else if (error.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(error);
       }
-      if (error.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_404).send({ message: "Item not found" });
-      }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Failed dislike function" });
     });
 };
 

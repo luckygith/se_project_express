@@ -12,12 +12,15 @@ const {
   INCORRECT_INFO_401,
 } = require("../utils/statusCodes");
 
+const BadRequestError = require("../errors/bad-request-error");
+const ConflictError = require("../errors/unauthorized-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
+const NotFoundError = require("../errors/not-found-error");
+
 const login = (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST_400)
-      .send({ message: "Missing Info: Email or Password" });
+    next(new BadRequestError("Missing Info: Email or Password"));
   }
   return User.findUserByCredentials(email, password) // calling model method to verify creds
     .then((user) => {
@@ -29,17 +32,12 @@ const login = (req, res) => {
     })
     .catch((error) => {
       if (error.message === "User not found") {
-        return res
-          .status(INCORRECT_INFO_401)
-          .send({ message: "Authentication Error: user" });
+        next(new ConflictError("Authentication Error: user"));
+      } else if (error.message === "Incorrect password") {
+        next(new UnauthorizedError("Authentication Error: password"));
+      } else {
+        next(error);
       }
-      if (error.message === "Incorrect password") {
-        return res
-          .status(INCORRECT_INFO_401)
-          .send({ message: "Authentication Error: password" });
-      }
-      // // authentication error
-      return res.status(SERVER_ERROR_500).send({ message: error.message });
     });
 };
 
@@ -50,19 +48,16 @@ const getCurrentUser = (req, res) => {
 
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_404).send({ message: "User not found" });
+        next(new NotFoundError("User not found"));
       }
       return res.status(200).send(user);
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "UserId is invalid" });
+        next(new BadRequestError("UserId is invalid"));
+      } else {
+        next(error);
       }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Servor Error: User info request unsuccessful" });
     });
 };
 
@@ -70,9 +65,7 @@ const createUser = (req, res) => {
   const { email, password, name, avatar } = req.body;
 
   if (!email || !password || !name || !avatar) {
-    return res
-      .status(BAD_REQUEST_400)
-      .send({ message: "Missing required fields" });
+    next(new BadRequestError("Missing required fields"));
   }
 
   return User.findOne({ email }) // Check if user already exists
@@ -106,19 +99,12 @@ const createUser = (req, res) => {
         error.code === 11000 ||
         error.message.includes("User already exists")
       ) {
-        return res
-          .status(DUPLICATE_ERROR_409)
-          .send({ message: "Error: User already exists" });
+        next(new ConflictError("Error: User already exists"));
+      } else if (error.name === "ValidationError") {
+        next(new BadRequestError("Error: name validation"));
+      } else {
+        next(error);
       }
-      if (error.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Error: name validation" });
-      }
-      return res.status(SERVER_ERROR_500).send({
-        message: "Server Error: Create User was unsuccessful",
-        error,
-      });
     });
 };
 
@@ -134,19 +120,16 @@ const updateUserProfile = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_404).send({ message: "User not found!!!" });
+        next(new NotFoundError("User not found"));
       }
       return res.send({ user });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_400)
-          .send({ message: "Error: Invalid data" });
+        next(new BadRequestError("Error: Invalid data"));
+      } else {
+        next(error);
       }
-      return res
-        .status(SERVER_ERROR_500)
-        .send({ message: "Servor Error: request unsuccessful" });
     });
 };
 
