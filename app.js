@@ -2,6 +2,7 @@ const express = require("express"); // connect express server!
 const cors = require("cors");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const { errors } = require("celebrate");
 const { errorHandler } = require("./middlewares/error-handler");
 
 // INITIALIZE EXPRESS APP
@@ -28,9 +29,11 @@ app.listen(PORT, () => {
 // USE ROUTER
 app.use(express.json());
 
-// DESIGNATED CUSHION FOR USER INFO FOR NOW
-// x
-
+// App's router
 app.use("/", mainRouter);
 
+// celebrate's speial error middleware for sending errors to user before custom  centralized error handler
+app.use(errors());
+
+// centralized handler
 app.use(errorHandler);

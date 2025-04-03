@@ -68,7 +68,7 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
   const userId = req.user._id;
   if (!itemId) {
-    return res.status(BAD_REQUEST_400).send({ message: "Item ID is required" });
+    next(new BadRequestError("Item ID is required"));
   }
   return ClothingItem.findByIdAndUpdate(
     itemId,

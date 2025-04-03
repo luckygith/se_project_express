@@ -16,7 +16,7 @@ const validateURL = (value, helpers) => {
 
 // validation functions for spec input bodies
 
-const validateClothingItemBody = celebrate({
+module.exports.const validateClothingItemBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
@@ -34,7 +34,7 @@ const validateClothingItemBody = celebrate({
 
 
 
-const validateUserInfoBody = celebrate({
+module.exports.const validateUserInfoBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
@@ -56,7 +56,7 @@ const validateUserInfoBody = celebrate({
   }),
 });
 
-const validateUserLoginBody = celebrate({
+module.exports.const validateUserLoginBody = celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -69,12 +69,13 @@ const validateUserLoginBody = celebrate({
   }),
 });
 
-const validateUserItemId = celebrate({
-  body: Joi.object().keys({
+module.exports.const validateUserItemId = celebrate({
+  params: Joi.object().keys({
     id: Joi.length(24).hex(), // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
   }),
 });
 
 
-  "string.min": "The minimum length of the 'name' field is 2 characters"
-      "string.max" : "The maximum length of the 'name' field is 30"
+// params: Used when the data is part of the URL path (e.g., /items/:itemId).
+// body: Used when the data is sent in the request body (e.g., in a POST or PUT request).
+
