@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
 const { errors } = require("celebrate");
 const { errorHandler } = require("./middlewares/error-handler");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
@@ -31,6 +32,9 @@ app.use(express.json());
 
 // App's router
 app.use("/", mainRouter);
+
+app.use(requestLogger);
+app.use(errorLogger); // enabling error loger after routes and before error
 
 // celebrate's speial error middleware for sending errors to user before custom  centralized error handler
 app.use(errors());
