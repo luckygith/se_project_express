@@ -5,6 +5,7 @@ const mainRouter = require("./routes/index");
 const { errors } = require("celebrate");
 const { errorHandler } = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+require("dotenv").config();
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
