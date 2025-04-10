@@ -1,3 +1,6 @@
+const express = require("express"); // connect express server!
+const app = express();
+
 const router = require("express").Router();
 
 const userRouter = require("./users");
@@ -5,6 +8,12 @@ const clothingItemRouter = require("./clothingItems");
 const { NOT_FOUND_404 } = require("../utils/statusCodes");
 const { login, createUser } = require("../controllers/users");
 const auth = require("../middlewares/auth");
+
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
 
 // No authentication
 router.post("/signup", createUser);
