@@ -23,3 +23,14 @@ At this stage, you'll:
 -Create routes and controllers for signing up and signing in
 -Create routes and controllers for modifying the current user data
 -Protect existing routes
+
+## Deployment phase: Deploying and hosting the cloud
+
+This phase is aimed to create a remote server using google cloud services to apply our code to a virtual machine. Since before this phase, my server for this code was only accessible via IP address for a limited time when the server is up and running. For continuous online process management and avoiding crash reboot I have utilized Pm2 and created a subdomain registered under a public domain for both front and backend.
+
+Technologies and techniques used in this portion includes:
+-Google Cloud Services
+-DNS
+-PM2
+-NginX
+-Certbot( HTTPS traffic will be encrypted using SSL)
