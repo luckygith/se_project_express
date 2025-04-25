@@ -9,7 +9,7 @@ const {
   UNAUTHORIZED_403,
 } = require("../utils/statusCodes");
 
-const createClothingItem = (req, res) => {
+const createClothingItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItem) => res.send(clothingItem))
