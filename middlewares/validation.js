@@ -16,16 +16,20 @@ const validateURL = (value, helpers) => {
 
 // validation functions for spec input bodies
 
-module.exports.const validateClothingItemBody = celebrate({
+module.exports.validateClothingItemBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be filled in',
     }),
-    avatar: Joi.string().required().custom(validateURL).messages({
-      "string.empty": 'The 'imageUrl' field must be filled',
-      "string.uri" : 'The 'imageUrl' field must be a valid url',
+    weather: Joi.string().required().valid("hot", "warm", "cold").messages({
+      "string.empty": 'The "weather" field must be filled in',
+      "any.only": 'The "weather" field must be one of: hot, warm, cold',
+    }),
+    imageUrl: Joi.string().required().custom(validateURL).messages({
+      "string.empty": "The 'imageUrl' field must be filled",
+      "string.uri" : "The 'imageUrl' field must be a valid url",
     }),
   }),
 });
@@ -34,7 +38,7 @@ module.exports.const validateClothingItemBody = celebrate({
 
 
 
-module.exports.const validateUserInfoBody = celebrate({
+module.exports.validateUserInfoBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
@@ -42,8 +46,8 @@ module.exports.const validateUserInfoBody = celebrate({
       "string.empty": 'The "name" field must be filled in',
     }),
     avatar: Joi.string().url().custom(validateURL).messages({
-      "string.empty": 'The 'imageUrl' field must be filled',
-      "string.uri" : 'The 'imageUrl' field must be a valid url',
+      "string.empty": "The 'avatar' field must be filled",
+      "string.uri" : "The 'avatar' field must be a valid url",
     }),
     email: Joi.string().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -56,7 +60,7 @@ module.exports.const validateUserInfoBody = celebrate({
   }),
 });
 
-module.exports.const validateUserLoginBody = celebrate({
+module.exports.validateUserLoginBody = celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -69,9 +73,9 @@ module.exports.const validateUserLoginBody = celebrate({
   }),
 });
 
-module.exports.const validateUserItemId = celebrate({
+module.exports.validateUserItemId = celebrate({
   params: Joi.object().keys({
-    id: Joi.length(24).hex(), // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
+    id: Joi.string().length(24).hex() , // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
   }),
 });
 
