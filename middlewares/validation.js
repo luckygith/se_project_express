@@ -75,7 +75,7 @@ module.exports.validateUserLoginBody = celebrate({
 
 module.exports.validateUserItemId = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().length(24).hex() , // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
+    itemId: Joi.string().length(24).hex() , // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
   }),
 });
 
