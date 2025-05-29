@@ -31,8 +31,7 @@ app.listen(PORT, () => {
 });
 
 // USE ROUTER
-
-
+app.use(requestLogger);
 app.use(express.json());
 
 // App's router
