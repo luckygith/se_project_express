@@ -1,5 +1,5 @@
 const { Joi, celebrate } = require("celebrate");
-const { object, custom } = require("joi");
+
 const validator = require("validator");
 
 // validation for URL as built in url() is not strict

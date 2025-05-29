@@ -1,13 +1,9 @@
 const BadRequestError = require("../errors/bad-request-error");
 const NotFoundError = require("../errors/not-found-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
+const ForbiddenError = require("../errors/forbidden-error")
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST_400,
-  NOT_FOUND_404,
-  SERVER_ERROR_500,
-  UNAUTHORIZED_403,
-} = require("../utils/statusCodes");
+
 
 const createClothingItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
@@ -29,7 +25,7 @@ const createClothingItem = (req, res, next) => {
 // next(new BadRequestError("Invalid data provided"));
 // }
 
-const getClothingItems = (req, res) => {
+const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
     .catch((error) => {
@@ -37,7 +33,7 @@ const getClothingItems = (req, res) => {
     });
 };
 
-const deleteClothingItem = (req, res) => {
+const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -47,7 +43,7 @@ const deleteClothingItem = (req, res) => {
         next(new NotFoundError("Item not found"));
       }
       if (item.owner.toString() !== userId) {
-        next(new UnauthorizedError("Unauthorized request: user"));
+        return next(new UnauthorizedError("Unauthorized request: user"));
       }
 
       return ClothingItem.findByIdAndDelete(itemId).then(() =>
@@ -64,7 +60,7 @@ const deleteClothingItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
   if (!itemId) {
@@ -93,7 +89,7 @@ const likeItem = (req, res) => {
     });
 };
 
-const unlikeItem = (req, res) => {
+const unlikeItem = (req, res, next) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 

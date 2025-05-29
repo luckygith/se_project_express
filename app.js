@@ -1,11 +1,13 @@
+require("dotenv").config();
+const { errorHandler } = require("./middlewares/error-handler");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+
 const express = require("express"); // connect express server!
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { errors } = require("celebrate");
 const mainRouter = require("./routes/index");
-const { errorHandler } = require("./middlewares/error-handler");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
-require("dotenv").config();
+
 
 // INITIALIZE EXPRESS APP
 const app = express(); // mk express server inside
@@ -29,12 +31,13 @@ app.listen(PORT, () => {
 });
 
 // USE ROUTER
+
+
 app.use(express.json());
 
 // App's router
 app.use("/", mainRouter);
 
-app.use(requestLogger);
 app.use(errorLogger); // enabling error loger after routes and before error
 
 // celebrate's speial error middleware for sending errors to user before custom  centralized error handler

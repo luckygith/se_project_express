@@ -1,13 +1,15 @@
-const express = require("express"); // connect express server!
+const express = require("express");
+ // connect express server!
 const app = express();
 
 const router = require("express").Router();
+const {validateUserInfoBody, validateUserLoginBody} =require("../middlewares/validation")
 
 const userRouter = require("./users");
 const clothingItemRouter = require("./clothingItems");
-const { NOT_FOUND_404 } = require("../utils/statusCodes");
 const { login, createUser } = require("../controllers/users");
 const auth = require("../middlewares/auth");
+const NotFoundError = require("../errors/not-found-error");
 
 app.get("/crash-test", () => {
   setTimeout(() => {
@@ -16,16 +18,15 @@ app.get("/crash-test", () => {
 });
 
 // No authentication
-router.post("/signup", createUser);
-router.post("/signin", login);
+router.post("/signup", validateUserInfoBody, createUser);
+router.post("/signin", validateUserLoginBody, login);
 router.use("/items", clothingItemRouter);
 
 // Req authentication
 router.use("/users", auth, userRouter);
 
 router.use((req, res) => {
-  res.status(NOT_FOUND_404).send({ message: "Requested route not found" });
-});
+throw new NotFoundError("Requested route not found")});
 
 module.exports = router;
 
