@@ -79,6 +79,19 @@ module.exports.validateUserItemId = celebrate({
   }),
 });
 
+module.exports.validateUserUpdate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).messages({
+      "string.min": 'The minimum length of the "name" field is 2',
+      "string.max": 'The maximum length of the "name" field is 30',
+      "string.empty": 'The "name" field must be filled in',
+  }),
+  avatar: Joi.string().custom(validateURL).messages({
+    "string.empty": "The 'avatar' field must be filled",
+    "string.uri" : "The 'avatar' field must be a valid url",
+}),
+}),
+});
 
 // params: Used when the data is part of the URL path (e.g., /items/:itemId).
 // body: Used when the data is sent in the request body (e.g., in a POST or PUT request).

@@ -1,9 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const { INCORRECT_INFO_401 } = require("../utils/statusCodes");
 
 const {UnauthorizedError} = require("../errors/unauthorized-error")
-const {ForbiddenError} = require("../errors/forbidden-error")
 
 const { JWT_SECRET } = require("../utils/config");
 
@@ -11,9 +9,6 @@ const auth = (req, res, next) => {
   const { authorization } = req.headers; // gets authorization header from request!
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    // return res
-    //   .status(INCORRECT_INFO_401)
-    //   .send({ message: "Authorization required" });
     throw new UnauthorizedError("Unauthorized error: missing or invalid token")
 
   }
@@ -27,7 +22,7 @@ const auth = (req, res, next) => {
     return next();
     // onto next middleware when successful!
   } catch (error) {
-    throw new ForbiddenError("Unauthorized error: unsuccessful request")
+    throw new UnauthorizedError("Unauthorized error: unsuccessful request")
   }
 };
 

@@ -1,7 +1,6 @@
 const BadRequestError = require("../errors/bad-request-error");
 const NotFoundError = require("../errors/not-found-error");
-const UnauthorizedError = require("../errors/unauthorized-error");
-const ForbiddenError = require("../errors/forbidden-error")
+const ForbiddenError = require("../errors/forbidden-error");
 const ClothingItem = require("../models/clothingItem");
 
 
@@ -20,10 +19,6 @@ const createClothingItem = (req, res, next) => {
     });
 };
 
-// .catch((error) => {
-// if (error.name === "CastError") {
-// next(new BadRequestError("Invalid data provided"));
-// }
 
 const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
@@ -40,10 +35,10 @@ const deleteClothingItem = (req, res, next) => {
   ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
-        next(new NotFoundError("Item not found"));
+        return next(new NotFoundError("Item not found"));
       }
       if (item.owner.toString() !== userId) {
-        return next(new UnauthorizedError("Unauthorized request: user"));
+        return next(new ForbiddenError("Forbidden error: revoked user accessed"));
       }
 
       return ClothingItem.findByIdAndDelete(itemId).then(() =>

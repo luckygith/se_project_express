@@ -1,11 +1,11 @@
 require("dotenv").config();
-const { errorHandler } = require("./middlewares/error-handler");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { errors } = require("celebrate");
 
 const express = require("express"); // connect express server!
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { errors } = require("celebrate");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { errorHandler } = require("./middlewares/error-handler");
 const mainRouter = require("./routes/index");
 
 
@@ -32,6 +32,7 @@ app.listen(PORT, () => {
 
 // USE ROUTER
 app.use(requestLogger);
+
 app.use(express.json());
 
 // App's router

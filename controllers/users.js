@@ -27,11 +27,11 @@ const login = (req, res, next) => {
     .catch((error) => {
       if (error.message === "User not found") {
         return next(new ConflictError("Authentication Error: user"));
-      } else if (error.message === "Incorrect password") {
+      } if (error.message === "Incorrect password") {
         return next(new UnauthorizedError("Authentication Error: password"));
-      } else {
+      } 
         return next(error);
-      }
+      
     });
 };
 
@@ -49,9 +49,9 @@ const getCurrentUser = (req, res, next) => {
     .catch((error) => {
       if (error.name === "CastError") {
         return next(new BadRequestError("UserId is invalid"));
-      } else {
+      } 
         return next(error);
-      }
+      
     });
 };
 
@@ -94,11 +94,11 @@ const createUser = (req, res, next) => {
         error.message.includes("User already exists")
       ) {
         return next(new ConflictError("Error: User already exists"));
-      } else if (error.name === "ValidationError") {
+      } if (error.name === "ValidationError") {
         return next(new BadRequestError("Error: name validation"));
-      } else {
+      } 
         return next(error);
-      }
+      
     });
 };
 
@@ -121,9 +121,9 @@ const updateUserProfile = (req, res, next) => {
     .catch((error) => {
       if (error.name === "ValidationError") {
         return next(new BadRequestError("Error: Invalid data"));
-      } else {
+      } 
         return next(error);
-      }
+      
     });
 };
 
