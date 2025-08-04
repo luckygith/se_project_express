@@ -16,38 +16,12 @@ const validateURL = (value, helpers) => {
 
 // validation functions for spec input bodies
 
-module.exports.validateClothingItemBody = celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30).messages({
-      "string.min": 'The minimum length of the "name" field is 2',
-      "string.max": 'The maximum length of the "name" field is 30',
-      "string.empty": 'The "name" field must be filled in',
-    }),
-    weather: Joi.string().required().valid("hot", "warm", "cold").messages({
-      "string.empty": 'The "weather" field must be filled in',
-      "any.only": 'The "weather" field must be one of: hot, warm, cold',
-    }),
-    imageUrl: Joi.string().required().custom(validateURL).messages({
-      "string.empty": "The 'imageUrl' field must be filled",
-      "string.uri" : "The 'imageUrl' field must be a valid url",
-    }),
-  }),
-});
-
-
-
-
-
 module.exports.validateUserInfoBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be filled in',
-    }),
-    avatar: Joi.string().custom(validateURL).messages({
-      "string.empty": "The 'avatar' field must be filled",
-      "string.uri" : "The 'avatar' field must be a valid url",
     }),
     email: Joi.string().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -75,7 +49,7 @@ module.exports.validateUserLoginBody = celebrate({
 
 module.exports.validateUserItemId = celebrate({
   params: Joi.object().keys({
-    itemId: Joi.string().length(24).hex() , // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
+    itemId: Joi.string().length(24).hex(), // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
   }),
 });
 
@@ -85,14 +59,13 @@ module.exports.validateUserUpdate = celebrate({
       "string.min": 'The minimum length of the "name" field is 2',
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be filled in',
+    }),
+    avatar: Joi.string().custom(validateURL).messages({
+      "string.empty": "The 'avatar' field must be filled",
+      "string.uri": "The 'avatar' field must be a valid url",
+    }),
   }),
-  avatar: Joi.string().custom(validateURL).messages({
-    "string.empty": "The 'avatar' field must be filled",
-    "string.uri" : "The 'avatar' field must be a valid url",
-}),
-}),
 });
 
 // params: Used when the data is part of the URL path (e.g., /items/:itemId).
 // body: Used when the data is sent in the request body (e.g., in a POST or PUT request).
-
