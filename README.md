@@ -6,14 +6,14 @@ The goal is to create a robust back-end service that handles user authentication
 
 # Table of Contents
 
-Overview
-Project Features
-Technologies Used
-Implementation
-Running the Project
-Screenshots / API Demo
-Results
-Future Improvements
+1. Overview
+2. Project Features
+3. Technologies Used
+4. Implementation
+5. Running the Project
+6. Screenshots / API Demo
+7. Results
+8. Future Improvements
 
 # Overview
 
@@ -105,3 +105,8 @@ Add rate limiting and logging for enhanced security
 Implement unit and integration testing for reliability
 Explore CI/CD automation for faster deployment cycless
 Add comprehensive API documentation for future developers
+
+# Links & Resources
+
+LINK TO BACKEND:
+https://github.com/luckygith/se_project_express.git
