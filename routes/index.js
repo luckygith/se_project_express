@@ -1,9 +1,12 @@
 const express = require("express");
- // connect express server!
+// connect express server!
 const app = express();
 
 const router = require("express").Router();
-const {validateUserInfoBody, validateUserLoginBody} =require("../middlewares/validation")
+const {
+  validateUserInfoBody,
+  validateUserLoginBody,
+} = require("../middlewares/validation");
 
 const userRouter = require("./users");
 const clothingItemRouter = require("./clothingItems");
@@ -26,7 +29,7 @@ router.use("/items", clothingItemRouter);
 router.use("/users", auth, userRouter);
 
 router.use((req, res, next) => {
-next(new NotFoundError("Requested route not found"))
+  next(new NotFoundError("Requested route not found"));
 });
 
 module.exports = router;

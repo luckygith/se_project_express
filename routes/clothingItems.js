@@ -1,7 +1,10 @@
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
 
-const {validateClothingItemBody, validateUserItemId} = require("../middlewares/validation")
+const {
+  validateClothingItemBody,
+  validateUserItemId,
+} = require("../middlewares/validation");
 
 // GET /items — returns all clothing items
 // POST /items — creates a new item

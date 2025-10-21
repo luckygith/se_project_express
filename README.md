@@ -94,7 +94,6 @@ npm run dev # Launches the server with hot reload
 ## Results
 
 - Successfully deployed a fully functional back-end server with secure routes
-
 - Achieved continuous uptime with PM2 and SSL-encrypted endpoints
 
 - Completed Phase II authorization and security requirements

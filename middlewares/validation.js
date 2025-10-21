@@ -47,6 +47,20 @@ module.exports.validateUserLoginBody = celebrate({
   }),
 });
 
+module.exports.validateClothingItemBody = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).messages({
+      "string.min": 'The minimum length of the "name" field is 2',
+      "string.max": 'The maximum length of the "name" field is 30',
+      "string.empty": 'The "name" field must be filled in',
+    }),
+    weather: Joi.string().valid("hot", "warm", "cold").required().messages({
+      "any.only": 'The "weather" field must be "hot", "warm", or "cold"',
+      "any.required": 'The "weather" field is required',
+    }),
+  }),
+});
+
 module.exports.validateUserItemId = celebrate({
   params: Joi.object().keys({
     itemId: Joi.string().length(24).hex(), // length is explicitly 24 / only hexadecimal characters (0-9, a-f) are allowed
